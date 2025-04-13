@@ -13,7 +13,7 @@ app.use(express.json());
 const SMTP_SERVER = "smtp.gmail.com";
 const SMTP_PORT = 587;
 const SENDER_EMAIL = "pvishwak18@gmail.com";
-const SENDER_PASSWORD = "zwfl dmmd iqvc eqgg";
+const SENDER_PASSWORD = ""; // google app password here
 
 // Function to get the latest file from a folder
 function getLatestFile(downloadFolder) {
