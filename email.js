@@ -17,10 +17,19 @@ const SENDER_PASSWORD = ""; // google app password here
 
 // Function to get the latest file from a folder
 function getLatestFile(downloadFolder) {
-  const files = fs.readdirSync(downloadFolder).map((file) => ({
-    name: file,
-    time: fs.statSync(path.join(downloadFolder, file)).mtime.getTime(),
-  }));
+  const files = fs
+    .readdirSync(downloadFolder)
+    .map((file) => {
+      const filePath = path.join(downloadFolder, file);
+      const stats = fs.statSync(filePath);
+      return {
+        name: file,
+        time: stats.mtime.getTime(),
+        isFile: stats.isFile(),
+      };
+    })
+    .filter((file) => file.isFile);
+
   if (files.length === 0) return null;
   const latestFile = files.sort((a, b) => b.time - a.time)[0];
   return path.join(downloadFolder, latestFile.name);
@@ -86,6 +95,10 @@ app.post("/", async (req, res) => {
 
 // Start the server
 const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = { getLatestFile };
