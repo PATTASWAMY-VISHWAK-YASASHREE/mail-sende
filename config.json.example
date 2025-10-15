@@ -1,0 +1,6 @@
+{
+  "smtpServer": "smtp.example.com",
+  "smtpPort": 587,
+  "senderEmail": "your-email@example.com",
+  "senderPassword": "your-app-password"
+}
