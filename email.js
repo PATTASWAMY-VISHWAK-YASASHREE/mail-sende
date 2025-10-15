@@ -10,26 +10,24 @@ const app = express();
 app.use(express.json());
 
 // SMTP Configuration
-const SMTP_SERVER = "smtp.gmail.com";
-const SMTP_PORT = 587;
-const SENDER_EMAIL = "pvishwak18@gmail.com";
-const SENDER_PASSWORD = ""; // google app password here
+let config;
+try {
+  config = JSON.parse(fs.readFileSync("config.json"));
+} catch (error) {
+  console.error("Error reading config.json:", error);
+  process.exit(1);
+}
+const SMTP_SERVER = config.smtpServer;
+const SMTP_PORT = config.smtpPort;
+const SENDER_EMAIL = config.senderEmail;
+const SENDER_PASSWORD = config.senderPassword;
 
 // Function to get the latest file from a folder
 function getLatestFile(downloadFolder) {
-  const files = fs
-    .readdirSync(downloadFolder)
-    .map((file) => {
-      const filePath = path.join(downloadFolder, file);
-      const stats = fs.statSync(filePath);
-      return {
-        name: file,
-        time: stats.mtime.getTime(),
-        isFile: stats.isFile(),
-      };
-    })
-    .filter((file) => file.isFile);
-
+  const files = fs.readdirSync(downloadFolder).map((file) => ({
+    name: file,
+    time: fs.statSync(path.join(downloadFolder, file)).mtime.getTime(),
+  }));
   if (files.length === 0) return null;
   const latestFile = files.sort((a, b) => b.time - a.time)[0];
   return path.join(downloadFolder, latestFile.name);
@@ -95,10 +93,6 @@ app.post("/", async (req, res) => {
 
 // Start the server
 const PORT = 3000;
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
-
-module.exports = { getLatestFile };
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
