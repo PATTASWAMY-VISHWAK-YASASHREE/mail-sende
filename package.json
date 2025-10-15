@@ -1,5 +1,8 @@
 {
+  "name": "mail-sende",
+  "version": "1.0.0",
   "dependencies": {
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "multer": "^1.4.5-lts.2",
     "nodemailer": "^6.10.0"

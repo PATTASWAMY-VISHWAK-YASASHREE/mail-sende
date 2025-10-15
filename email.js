@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const ejs = require("ejs");
 
 const app = express();
 
@@ -37,12 +38,24 @@ const DOWNLOADS_FOLDER = path.join(os.homedir(), "Downloads");
 
 // POST route to accept JSON data (including email)
 app.post("/", async (req, res) => {
-  const recipientEmail = req.body.email; // email from JSON request
+  const { email: recipientEmail, username, customMessage } = req.body;
   const latestFilePath = getLatestFile(DOWNLOADS_FOLDER);
 
   if (!recipientEmail) {
     return res.status(400).send("Error: Recipient email is required!");
   }
+
+  const templateData = {
+    username: username || "User",
+    customMessage:
+      customMessage ||
+      "This is an automated email with your latest downloaded report.",
+  };
+
+  const html = await ejs.renderFile(
+    path.join(__dirname, "templates", "report-template.ejs"),
+    templateData
+  );
 
   const transporter = nodemailer.createTransport({
     host: SMTP_SERVER,
@@ -58,16 +71,7 @@ app.post("/", async (req, res) => {
     from: SENDER_EMAIL,
     to: recipientEmail,
     subject: "Automated Email with Latest Downloaded Report",
-    html: `
-      <html>
-      <head></head>
-      <body>
-          <h2 style="color: blue;">Hello,</h2>
-          <p>This is an <b>automated email</b> with your latest downloaded report.</p>
-          <p style="color: green;">Best regards,<br>SYNTAX SQUAD</p>
-      </body>
-      </html>
-    `,
+    html: html,
   };
 
   if (latestFilePath) {
